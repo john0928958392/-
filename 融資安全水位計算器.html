@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>融資安全水位計算器</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #eef2f3;
+            border-radius: 6px;
+            display: none;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .result-item.highlight {
+            font-weight: bold;
+            color: #e74c3c;
+            border-top: 1px solid #ccc;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>融資安全水位計算器</h1>
+    
+    <div class="input-group">
+        <label for="marketValue">當前市值</label>
+        <input type="number" id="marketValue" placeholder="請輸入市值" step="any">
+    </div>
+    
+    <div class="input-group">
+        <label for="loanAmount">融資金額</label>
+        <input type="number" id="loanAmount" placeholder="請輸入融資金額" step="any">
+    </div>
+    
+    <div class="input-group">
+        <label for="savings">存款</label>
+        <input type="number" id="savings" placeholder="請輸入存款金額" step="any">
+    </div>
+    
+    <button onclick="calculate()">計算安全水位</button>
+    
+    <div id="results" class="results">
+        <div class="result-item">
+            <span>淨資產 (市值-融資+存款):</span>
+            <span id="netAssets">0</span>
+        </div>
+        <div class="result-item">
+            <span>可融資市值 (淨資產/40%):</span>
+            <span id="loanableValue">0</span>
+        </div>
+        <div class="result-item">
+            <span>安全可融資總市值 (x 80%):</span>
+            <span id="safeTotalValue">0</span>
+        </div>
+        <div class="result-item highlight">
+            <span>安全水位 (市值/安全總市值):</span>
+            <span id="safetyLevel">0%</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const marketValue = parseFloat(document.getElementById('marketValue').value) || 0;
+        const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+        const savings = parseFloat(document.getElementById('savings').value) || 0;
+        
+        // 1. 我們的資產 = 市值 - 融資金額 + 存款
+        const netAssets = marketValue - loanAmount + savings;
+        
+        // 2. 可以融資的市值 = 我們的資產 / 40%
+        const loanableValue = netAssets / 0.4;
+        
+        // 3. 安全可融資的總市值 = 可以融資的市值 * 80%
+        const safeTotalValue = loanableValue * 0.8;
+        
+        // 4. 我們的安全水位 = 市值 / 安全可融資的總市值
+        let safetyLevel = 0;
+        if (safeTotalValue !== 0) {
+            safetyLevel = (marketValue / safeTotalValue) * 100;
+        }
+
+        // 顯示結果
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('netAssets').innerText = netAssets.toLocaleString();
+        document.getElementById('loanableValue').innerText = loanableValue.toLocaleString();
+        document.getElementById('safeTotalValue').innerText = safeTotalValue.toLocaleString();
+        document.getElementById('safetyLevel').innerText = safetyLevel.toFixed(2) + '%';
+    }
+</script>
+
+</body>
+</html>
