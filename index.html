@@ -1,167 +1,130 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>融資安全水位計算器</title>
+    <title>融資安全水位計算器 V2</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-        }
-        body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--primary-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 0.5rem;
-        }
-        .input-group {
-            margin-bottom: 1rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-        button {
-            width: 100%;
-            padding: 1rem;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 1rem;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .results {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background-color: #eef2f3;
-            border-radius: 6px;
-            display: none;
-        }
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-        .result-item.highlight {
-            font-weight: bold;
-            color: #e74c3c;
-            border-top: 1px solid #ccc;
-            padding-top: 0.5rem;
-            margin-top: 0.5rem;
-            font-size: 1.1rem;
-        }
+        :root { --primary-color: #2c3e50; --accent-color: #3498db; --bg-color: #f4f7f6; --card-bg: #ffffff; }
+        body { font-family: 'PingFang TC', sans-serif; background-color: var(--bg-color); color: var(--primary-color); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: var(--card-bg); padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; }
+        h1 { text-align: center; font-size: 1.4rem; margin-bottom: 1.5rem; color: var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 0.5rem; }
+        .unit-hint { font-size: 0.8rem; color: #e74c3c; text-align: right; margin-bottom: 10px; font-weight: bold; }
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 1rem; background-color: var(--accent-color); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 1rem; }
+        button:hover { background-color: #2980b9; }
+        .results { margin-top: 1.5rem; padding: 1rem; background-color: #eef2f3; border-radius: 6px; display: none; }
+        .result-item { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .result-item.highlight { font-weight: bold; color: #e74c3c; border-top: 1px solid #ccc; padding-top: 0.5rem; margin-top: 0.5rem; font-size: 1.1rem; }
+        
+        /* 歷史紀錄表格樣式 */
+        .history-container { width: 100%; max-width: 600px; background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h2 { font-size: 1.1rem; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
+        th { background-color: #f8f9fa; }
+        tr:nth-child(even) { background-color: #fafafa; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>融資安全水位計算器</h1>
+    <div class="unit-hint">單位：千元 (1,000 = 100萬)</div>
     
     <div class="input-group">
-        <label for="marketValue">當前市值</label>
-        <input type="number" id="marketValue" placeholder="請輸入市值" step="any">
+        <label>當前市值 (千元)</label>
+        <input type="number" id="marketValue" placeholder="例如：5000" step="any">
     </div>
-    
     <div class="input-group">
-        <label for="loanAmount">融資金額</label>
-        <input type="number" id="loanAmount" placeholder="請輸入融資金額" step="any">
+        <label>融資金額 (千元)</label>
+        <input type="number" id="loanAmount" placeholder="例如：2000" step="any">
     </div>
-    
     <div class="input-group">
-        <label for="savings">存款</label>
-        <input type="number" id="savings" placeholder="請輸入存款金額" step="any">
+        <label>存款 (千元)</label>
+        <input type="number" id="savings" placeholder="例如：500" step="any">
     </div>
     
-    <button onclick="calculate()">計算安全水位</button>
+    <button onclick="calculate()">計算並紀錄</button>
     
     <div id="results" class="results">
-        <div class="result-item">
-            <span>淨資產 (市值-融資+存款):</span>
-            <span id="netAssets">0</span>
-        </div>
-        <div class="result-item">
-            <span>可融資市值 (淨資產/40%):</span>
-            <span id="loanableValue">0</span>
-        </div>
-        <div class="result-item">
-            <span>安全可融資總市值 (x 80%):</span>
-            <span id="safeTotalValue">0</span>
-        </div>
-        <div class="result-item highlight">
-            <span>安全水位 (市值/安全總市值):</span>
-            <span id="safetyLevel">0%</span>
-        </div>
+        <div class="result-item"><span>淨資產 (市值-融資+存款):</span><span id="netAssets">0</span></div>
+        <div class="result-item"><span>可融資市值 (淨資產/40%):</span><span id="loanableValue">0</span></div>
+        <div class="result-item"><span>安全可融資總市值 (x 80%):</span><span id="safeTotalValue">0</span></div>
+        <div class="result-item highlight"><span>安全水位:</span><span id="safetyLevel">0%</span></div>
     </div>
 </div>
 
-<script>
-    function calculate() {
-        const marketValue = parseFloat(document.getElementById('marketValue').value) || 0;
-        const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-        const savings = parseFloat(document.getElementById('savings').value) || 0;
-        
-        // 1. 我們的資產 = 市值 - 融資金額 + 存款
-        const netAssets = marketValue - loanAmount + savings;
-        
-        // 2. 可以融資的市值 = 我們的資產 / 40%
-        const loanableValue = netAssets / 0.4;
-        
-        // 3. 安全可融資的總市值 = 可以融資的市值 * 80%
-        const safeTotalValue = loanableValue * 0.8;
-        
-        // 4. 我們的安全水位 = 市值 / 安全可融資的總市值
-        let safetyLevel = 0;
-        if (safeTotalValue !== 0) {
-            safetyLevel = (marketValue / safeTotalValue) * 100;
-        }
+<div class="history-container">
+    <h2>最近 10 次紀錄</h2>
+    <table id="historyTable">
+        <thead>
+            <tr>
+                <th>時間</th>
+                <th>市值(千)</th>
+                <th>融資(千)</th>
+                <th>安全水位</th>
+            </tr>
+        </thead>
+        <tbody id="historyBody">
+            <!-- 紀錄會顯示在這裡 -->
+        </tbody>
+    </table>
+</div>
 
-        // 顯示結果
+<script>
+    // 頁面載入時讀取舊紀錄
+    window.onload = function() { displayHistory(); };
+
+    function calculate() {
+        const mv = parseFloat(document.getElementById('marketValue').value) || 0;
+        const la = parseFloat(document.getElementById('loanAmount').value) || 0;
+        const sv = parseFloat(document.getElementById('savings').value) || 0;
+        
+        const netAssets = mv - la + sv;
+        const loanableValue = netAssets / 0.4;
+        const safeTotalValue = loanableValue * 0.8;
+        let safetyLevel = safeTotalValue !== 0 ? (mv / safeTotalValue) * 100 : 0;
+
+        // 顯示當次結果
         document.getElementById('results').style.display = 'block';
         document.getElementById('netAssets').innerText = netAssets.toLocaleString();
         document.getElementById('loanableValue').innerText = loanableValue.toLocaleString();
         document.getElementById('safeTotalValue').innerText = safeTotalValue.toLocaleString();
         document.getElementById('safetyLevel').innerText = safetyLevel.toFixed(2) + '%';
+
+        // 儲存紀錄
+        saveRecord(mv, la, safetyLevel.toFixed(2) + '%');
+    }
+
+    function saveRecord(mv, la, level) {
+        const now = new Date();
+        const timeStr = (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+        
+        let history = JSON.parse(localStorage.getItem('financeHistory') || '[]');
+        history.unshift({ time: timeStr, mv: mv, la: la, level: level }); // 新紀錄放最前面
+        
+        if (history.length > 10) history.pop(); // 超過10筆就刪掉舊的
+        
+        localStorage.setItem('financeHistory', JSON.stringify(history));
+        displayHistory();
+    }
+
+    function displayHistory() {
+        const history = JSON.parse(localStorage.getItem('financeHistory') || '[]');
+        const body = document.getElementById('historyBody');
+        body.innerHTML = '';
+        history.forEach(item => {
+            const row = `<tr>
+                <td>${item.time}</td>
+                <td>${item.mv.toLocaleString()}</td>
+                <td>${item.la.toLocaleString()}</td>
+                <td style="color:red; font-weight:bold;">${item.level}</td>
+            </tr>`;
+            body.innerHTML += row;
+        });
     }
 </script>
 
